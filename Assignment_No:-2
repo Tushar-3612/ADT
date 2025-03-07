@@ -1,0 +1,221 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Employee {
+public:
+    string name;
+    int emp_id;
+    double salary;
+
+    Employee() : name(""), emp_id(0), salary(0.0) {}
+
+    Employee(string name, int emp_id, double salary)
+        : name(name), emp_id(emp_id), salary(salary) {}
+
+    void display() {
+        cout << "( Employee Name:- " << name << " Employee ID:- " << emp_id 
+             << " Employee Salary:-  " << salary << ")\n";
+    }
+};
+
+class BSTNode {
+public:
+    Employee employee;
+    BSTNode* left;
+    BSTNode* right;
+
+    BSTNode(Employee emp) : employee(emp), left(NULL), right(NULL) {}
+};
+
+class EmployeeManagementSystem {
+private:
+    BSTNode* root;
+    int total_employees;
+    double total_salary;
+
+    BSTNode* insert(BSTNode* node, Employee emp) {
+        if (node == NULL) {
+            total_employees++;
+            total_salary += emp.salary;
+            return new BSTNode(emp);
+        }
+        if (emp.salary < node->employee.salary)
+            node->left = insert(node->left, emp);
+        else if (emp.salary > node->employee.salary)
+            node->right = insert(node->right, emp);
+        return node;
+    }
+
+    BSTNode* search(BSTNode* node, double salary) {
+        if (node == NULL || node->employee.salary == salary)
+            return node;
+        if (salary < node->employee.salary)
+            return search(node->left, salary);
+        return search(node->right, salary);
+    }
+
+    BSTNode* findMin(BSTNode* node) {
+        while (node && node->left != NULL)
+            node = node->left;
+        return node;
+    }
+
+    BSTNode* findMax(BSTNode* node) {
+        while (node && node->right != NULL)
+            node = node->right;
+        return node;
+    }
+
+    void inOrder(BSTNode* node) const {
+        if (node == NULL) return;
+        inOrder(node->left);
+        node->employee.display();
+        inOrder(node->right);
+    }
+
+    void updateEmployee(BSTNode* node, int emp_id, string new_name) {
+        if (node == NULL) return;
+        if (node->employee.emp_id == emp_id) {
+            node->employee.name = new_name;
+            cout << "Employee name updated successfully.\n";
+            return;
+        }
+        updateEmployee(node->left, emp_id, new_name);
+        updateEmployee(node->right, emp_id, new_name);
+    }
+
+public:
+    EmployeeManagementSystem() : root(NULL), total_employees(0), total_salary(0.0) {}
+
+    void createEmployee(string name, int emp_id, double salary) {
+        Employee emp(name, emp_id, salary);
+        root = insert(root, emp);
+    }
+
+    void searchEmployee(double salary) {
+        BSTNode* result = search(root, salary);
+        if (result == NULL) {
+            cout << "Employee with salary " << salary << " not found.\n";
+        } else {
+            cout << "Employee found: ";
+            result->employee.display();
+        }
+    }
+
+    void updateEmployeeById(int emp_id, string new_name) {
+        updateEmployee(root, emp_id, new_name);
+    }
+
+    void displayEmployees() const {
+        if (root == NULL) {
+            cout << "No employees found.\n";
+        } else {
+            cout << "Employees in ascending order of salary:\n";
+            inOrder(root);
+        }
+    }
+
+    void findMinSalary() {
+        BSTNode* minNode = findMin(root);
+        if (minNode == NULL) {
+            cout << "No employees found.\n";
+        } else {
+            cout << "Employee with minimum salary: ";
+            minNode->employee.display();
+        }
+    }
+
+    void findMaxSalary() {
+        BSTNode* maxNode = findMax(root);
+        if (maxNode == NULL) {
+            cout << "No employees found.\n";
+        } else {
+            cout << "Employee with maximum salary: ";
+            maxNode->employee.display();
+        }
+    }
+
+    void findAverageSalary() const {
+        if (total_employees == 0) {
+            cout << "No employees found.\n";
+        } else {
+            double average = total_salary / total_employees;
+            cout << "Average salary of all employees: " << average << "\n";
+        }
+    }
+
+    void getTotalEmployees() const {
+        cout << "Total number of employees: " << total_employees << "\n";
+    }
+};
+
+int main() {
+    EmployeeManagementSystem ems;
+    int choice;
+    string name;
+    int emp_id;
+    double salary;
+
+    do {
+        cout << "\nEmployee Management System Menu:\n";
+        cout << "1. Create Employee\n";
+        cout << "2. Search Employee\n";
+        cout << "3. Update Employee Name by ID\n";
+        cout << "4. Display All Employees\n";
+        cout << "5. Find Minimum Salary\n";
+        cout << "6. Find Maximum Salary\n";
+        cout << "7. Find Average Salary\n";
+        cout << "8. Get Total Number of Employees\n";
+        cout << "9. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                cout << "Enter employee name: ";
+                cin >> name;
+                cout << "Enter employee ID: ";
+                cin >> emp_id;
+                cout << "Enter employee salary: ";
+                cin >> salary;
+                ems.createEmployee(name, emp_id, salary);
+                break;
+            case 2:
+                cout << "Enter salary to search: ";
+                cin >> salary;
+                ems.searchEmployee(salary);
+                break;
+            case 3:
+                cout << "Enter Employee ID: ";
+                cin >> emp_id;
+                cout << "Enter New Name: ";
+                cin >> name;
+                ems.updateEmployeeById(emp_id, name);
+                break;
+            case 4:
+                ems.displayEmployees();
+                break;
+            case 5:
+                ems.findMinSalary();
+                break;
+            case 6:
+                ems.findMaxSalary();
+                break;
+            case 7:
+                ems.findAverageSalary();
+                break;
+            case 8:
+                ems.getTotalEmployees();
+                break;
+            case 9:
+                cout << "Exiting the program.\n";
+                break;
+            default:
+                cout << "Invalid choice! Please try again.\n";
+                break;
+        }
+    } while (choice != 9);
+
+    return 0;
+}
